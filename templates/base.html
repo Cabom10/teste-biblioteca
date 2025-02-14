@@ -1,178 +1,195 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <!-- Meta tags obrigatórias -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
-    {% block 'head' %}{% endblock %}
-    <title>{% block 'titulo' %}{% endblock %}</title>
-    <style>
-      .navbar-custom {
-        background-color: #ffe100; /* Cor de fundo personalizada */
-      }
-      /* Personaliza o texto dos elementos dentro da navbar */
-      .navbar-custom .navbar-brand,
-      .navbar-custom .nav-link,
-      .navbar-custom .navbar-text {
-        color: #000000 !important; /* Cor dos textos personalizada (ex: preto) */
-      }
-      /* Opcional: altera a cor dos links ao passar o mouse */
-      .navbar-custom .nav-link:hover {
-        color: #ffffff !important;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Navbar principal -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-      <a class="navbar-brand" href="{% url 'home' %}">Biblioteca VNT</a>
-      {% if usuario_logado %}
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ml-auto">
-          <!-- Itens do menu -->
-          <li class="nav-item">
-            <a class="nav-link" href="#emprestimo" data-toggle="tab">Emprestar</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#devolucao" data-toggle="tab">Devolver</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#cadastro" data-toggle="tab">Cadastrar</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'seus_emprestimos' %}">Meus Empréstimos</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'sair' %}">Sair</a>
-          </li>
-          <li class="nav-item">
-            <span class="navbar-text ml-2">Total: {{ total_livro }}</span>
-          </li>
-        </ul>
-      </div>
-      {% endif %}
-    </nav>
 
-    <div class="container mt-4">
-      {% if usuario_logado %}
-      <!-- Conteúdo das abas -->
-      <div class="tab-content" id="mainTabContent">
-        <!-- Aba de Cadastro: subdividida em Categoria e Livro -->
-        <div class="tab-pane fade" id="cadastro" role="tabpanel">
-          <h4 class="mb-3">Cadastro</h4>
-          <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-            <li class="nav-item">
-              <a class="nav-link active" id="pills-categoria-tab" data-toggle="pill" href="#pills-categoria" role="tab" aria-controls="pills-categoria" aria-selected="true">Categoria</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="pills-livro-tab" data-toggle="pill" href="#pills-livro" role="tab" aria-controls="pills-livro" aria-selected="false">Livro</a>
-            </li>
-          </ul>
-          <div class="tab-content" id="pills-tabContent">
-            <!-- Formulário para cadastrar categoria -->
-            <div class="tab-pane fade show active" id="pills-categoria" role="tabpanel" aria-labelledby="pills-categoria-tab">
-              <form action="{% url 'cadastrar_categoria' %}" method="POST">
-                {% csrf_token %}
-                <div class="form-group">
-                  {{ form_categoria.as_p }}
-                </div>
-                <input type="hidden" name="usuario" value="{{ usuario_logado }}">
-                <button type="submit" class="btn btn-success">Cadastrar Categoria</button>
-              </form>
-            </div>
-            <!-- Formulário para cadastrar livro -->
-            <div class="tab-pane fade" id="pills-livro" role="tabpanel" aria-labelledby="pills-livro-tab">
-              <form action="{% url 'cadastrar_livro' %}" method="POST">
-                {% csrf_token %}
-                <div class="form-group">
-                  {{ form.as_p }}
-                </div>
-                <button type="submit" class="btn btn-success">Cadastrar Livro</button>
-              </form>
-            </div>
-          </div>
-        </div>
+<head>
+  <!-- Meta tags obrigatórias -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  {% block 'head' %}{% endblock %}
+  <title>{% block 'titulo' %}{% endblock %}</title>
+  <style>
+    .navbar-custom {
+      background-color: #ffe100;
+      /* Cor de fundo personalizada */
+    }
 
-        <!-- Aba de Empréstimo -->
-        <div class="tab-pane fade" id="emprestimo" role="tabpanel">
-          <h4 class="mb-3">Registro de Empréstimo</h4>
-          <form id="form_emprestimo" action="{% url 'cadastrar_emprestimo' %}" method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-              <label>Tipo de Usuário:</label><br>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="tipo_usuario" id="usuarioNovo" value="novo" checked>
-                <label class="form-check-label" for="usuarioNovo">Usuário Novo</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="tipo_usuario" id="usuarioExistente" value="existente">
-                <label class="form-check-label" for="usuarioExistente">Usuário Existente</label>
-              </div>
-            </div>
-            <div class="form-group" id="select-usuario" style="display: none;">
-              <label>Selecione o usuário:</label>
-              <select class="form-control" name="nome_emprestado">
-                {% for usuario in usuarios %}
-                  <option value="{{ usuario.id }}">{{ usuario.nome }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group" id="input-usuario">
-              <label>Digite o nome do usuário:</label>
-              <input type="text" class="form-control" name="nome_emprestado_anonimo" placeholder="Nome do usuário">
-            </div>
-            <div class="form-group">
-              <label>Selecione o livro:</label>
-              <select class="form-control" name="livro_emprestado">
-                {% for livro in livros_emprestar %}
-                  <option value="{{ livro.id }}">{{ livro.nome }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <button type="submit" class="btn btn-success">Registrar Empréstimo</button>
-          </form>
-        </div>
+    /* Personaliza o texto dos elementos dentro da navbar */
+    .navbar-custom .navbar-brand,
+    .navbar-custom .nav-link,
+    .navbar-custom .navbar-text {
+      color: #000000 !important;
+      /* Cor dos textos personalizada (ex: preto) */
+    }
 
-        <!-- Aba de Devolução -->
-        <div class="tab-pane fade" id="devolucao" role="tabpanel">
-          <h4 class="mb-3">Registro de Devolução</h4>
-          <form action="{% url 'devolver_livro' %}" method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-              <label>Selecione o livro a ser devolvido:</label>
-              <select class="form-control" name="id_livro_devolver">
-                {% for livro in livros_emprestados %}
-                  <option value="{{ livro.id }}">{{ livro.nome }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <button type="submit" class="btn btn-warning">Registrar Devolução</button>
-          </form>
-        </div>
-      </div>
-      {% endif %}
+    /* Opcional: altera a cor dos links ao passar o mouse */
+    .navbar-custom .nav-link:hover {
+      color: #ffffff !important;
+    }
+  </style>
+</head>
 
-      {% block 'conteudo' %}{% endblock %}
+<body>
+  <!-- Navbar principal -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <a class="navbar-brand" href="{% url 'home' %}">Biblioteca VNT</a>
+    {% if usuario_logado %}
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ml-auto">
+        <!-- Itens do menu -->
+        <li class="nav-item">
+          <a class="nav-link" href="#emprestimo" data-toggle="tab">Emprestar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#devolucao" data-toggle="tab">Devolver</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#cadastro" data-toggle="tab">Cadastrar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'seus_emprestimos' %}">Meus Empréstimos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'sair' %}">Sair</a>
+        </li>
+        <li class="nav-item">
+          <span class="navbar-text ml-2">Total: {{ total_livro }}</span>
+        </li>
+      </ul>
     </div>
 
-    <!-- Scripts necessários -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      // Alterna entre os campos para usuário novo ou existente no formulário de empréstimo
-      $(document).ready(function(){
-        $('input[name="tipo_usuario"]').change(function(){
-          if($('#usuarioExistente').is(':checked')){
-            $('#select-usuario').show();
-            $('#input-usuario').hide();
-          } else {
-            $('#select-usuario').hide();
-            $('#input-usuario').show();
-          }
-        });
+
+
+    <form class="form-inline ml-3" method="GET" action="{% url 'buscar_livro' %}">
+      <input class="form-control mr-sm-2" type="search" name="q" placeholder="Buscar livro" aria-label="Buscar">
+      <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Buscar</button>
+    </form>
+    {% endif %}
+  </nav>
+
+  <div class="container mt-4">
+    {% if usuario_logado %}
+    <!-- Conteúdo das abas -->
+    <div class="tab-content" id="mainTabContent">
+      <!-- Aba de Cadastro: subdividida em Categoria e Livro -->
+      <div class="tab-pane fade" id="cadastro" role="tabpanel">
+        <h4 class="mb-3">Cadastro</h4>
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="pills-categoria-tab" data-toggle="pill" href="#pills-categoria" role="tab"
+              aria-controls="pills-categoria" aria-selected="true">Categoria</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="pills-livro-tab" data-toggle="pill" href="#pills-livro" role="tab"
+              aria-controls="pills-livro" aria-selected="false">Livro</a>
+          </li>
+        </ul>
+        <div class="tab-content" id="pills-tabContent">
+          <!-- Formulário para cadastrar categoria -->
+          <div class="tab-pane fade show active" id="pills-categoria" role="tabpanel"
+            aria-labelledby="pills-categoria-tab">
+            <form action="{% url 'cadastrar_categoria' %}" method="POST">
+              {% csrf_token %}
+              <div class="form-group">
+                {{ form_categoria.as_p }}
+              </div>
+              <input type="hidden" name="usuario" value="{{ usuario_logado }}">
+              <button type="submit" class="btn btn-success">Cadastrar Categoria</button>
+            </form>
+          </div>
+          <!-- Formulário para cadastrar livro -->
+          <div class="tab-pane fade" id="pills-livro" role="tabpanel" aria-labelledby="pills-livro-tab">
+            <form action="{% url 'cadastrar_livro' %}" method="POST">
+              {% csrf_token %}
+              <div class="form-group">
+                {{ form.as_p }}
+              </div>
+              <button type="submit" class="btn btn-success">Cadastrar Livro</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aba de Empréstimo -->
+      <div class="tab-pane fade" id="emprestimo" role="tabpanel">
+        <h4 class="mb-3">Registro de Empréstimo</h4>
+        <form id="form_emprestimo" action="{% url 'cadastrar_emprestimo' %}" method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            <label>Tipo de Usuário:</label><br>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="tipo_usuario" id="usuarioNovo" value="novo" checked>
+              <label class="form-check-label" for="usuarioNovo">Usuário Novo</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="tipo_usuario" id="usuarioExistente" value="existente">
+              <label class="form-check-label" for="usuarioExistente">Usuário Existente</label>
+            </div>
+          </div>
+          <div class="form-group" id="select-usuario" style="display: none;">
+            <label>Selecione o usuário:</label>
+            <select class="form-control" name="nome_emprestado">
+              {% for usuario in usuarios %}
+              <option value="{{ usuario.id }}">{{ usuario.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group" id="input-usuario">
+            <label>Digite o nome do usuário:</label>
+            <input type="text" class="form-control" name="nome_emprestado_anonimo" placeholder="Nome do usuário">
+          </div>
+          <div class="form-group">
+            <label>Selecione o livro:</label>
+            <select class="form-control" name="livro_emprestado">
+              {% for livro in livros_emprestar %}
+              <option value="{{ livro.id }}">{{ livro.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success">Registrar Empréstimo</button>
+        </form>
+      </div>
+
+      <!-- Aba de Devolução -->
+      <div class="tab-pane fade" id="devolucao" role="tabpanel">
+        <h4 class="mb-3">Registro de Devolução</h4>
+        <form action="{% url 'devolver_livro' %}" method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            <label>Selecione o livro a ser devolvido:</label>
+            <select class="form-control" name="id_livro_devolver">
+              {% for livro in livros_emprestados %}
+              <option value="{{ livro.id }}">{{ livro.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-warning">Registrar Devolução</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    {% block 'conteudo' %}{% endblock %}
+  </div>
+
+  <!-- Scripts necessários -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Alterna entre os campos para usuário novo ou existente no formulário de empréstimo
+    $(document).ready(function () {
+      $('input[name="tipo_usuario"]').change(function () {
+        if ($('#usuarioExistente').is(':checked')) {
+          $('#select-usuario').show();
+          $('#input-usuario').hide();
+        } else {
+          $('#select-usuario').hide();
+          $('#input-usuario').show();
+        }
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>

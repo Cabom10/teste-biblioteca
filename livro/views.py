@@ -6,6 +6,7 @@ from .models import Emprestimos, Livros, Categoria
 from .forms import CadastroLivro, CategoriaLivro
 from django import forms
 from django.db.models import Q
+from django.contrib import messages
 # Create your views here.
 
 def home(request):
@@ -170,3 +171,15 @@ def processa_avaliacao(request):
     emprestimo.save()
     return redirect(f'/livro/ver_livro/{id_livro}')
 
+def buscar_livro(request):
+    query = request.GET.get('q', '').strip()
+    if query:
+        try:
+            # Busca exata ignorando maiúsculas/minúsculas
+            livro = Livros.objects.get(nome__iexact=query)
+            return redirect('ver_livro', id=livro.id)
+        except Livros.DoesNotExist:
+            messages.error(request, "Livro não encontrado!")
+        except Livros.MultipleObjectsReturned:
+            messages.warning(request, "Mais de um livro foi encontrado. Por favor, refine sua busca.")
+    return redirect('home')
