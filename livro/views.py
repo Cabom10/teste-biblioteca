@@ -169,3 +169,4 @@ def processa_avaliacao(request):
     emprestimo.avaliacao = opcoes
     emprestimo.save()
     return redirect(f'/livro/ver_livro/{id_livro}')
+
