@@ -2,7 +2,11 @@
 
 
 {% block 'conteudo' %}
-
+<div class="btn-group">
+  <a href="{% url 'home' %}" class="btn btn-primary">Todos</a>
+  <a href="{% url 'home' %}?status=disponivel" class="btn btn-success">Disponíveis</a>
+  <a href="{% url 'home' %}?status=emprestado" class="btn btn-warning">Emprestados</a>
+</div>
 <div class="container">
   
     <br>
@@ -56,5 +60,6 @@
     
     </div>
 </div>
+
 
 {% endblock %}

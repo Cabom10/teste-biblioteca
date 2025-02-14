@@ -8,33 +8,35 @@ from django import forms
 from django.db.models import Q
 from django.contrib import messages
 # Create your views here.
-
 def home(request):
     if request.session.get('usuario'):  
-        usuario = Usuario.objects.get(id = request.session['usuario'])
+        usuario = Usuario.objects.get(id=request.session['usuario'])
         status_categoria = request.GET.get('cadastro_categoria')
-        livros = Livros.objects.filter(usuario = usuario)
-        total_livros = livros.count()
+        filtro_status = request.GET.get('status')  # Captura o parâmetro da URL
         form = CadastroLivro()
         form.fields['usuario'].initial = request.session['usuario']
-        form.fields['categoria'].queryset = Categoria.objects.filter(usuario = usuario)     
+        form.fields['categoria'].queryset = Categoria.objects.filter(usuario=usuario)     
         form_categoria = CategoriaLivro()
         usuarios = Usuario.objects.all()
 
-        livros_emprestar = Livros.objects.filter(usuario = usuario).filter(emprestado = False)
-        livros_emprestados = Livros.objects.filter(usuario = usuario).filter(emprestado = True)
+        # Aplicando filtro de livros
+        livros = Livros.objects.filter(usuario=usuario)
+        if filtro_status == "disponivel":
+            livros = livros.filter(emprestado=False)
+        elif filtro_status == "emprestado":
+            livros = livros.filter(emprestado=True)
 
-        
+        total_livros = livros.count()
 
-        return render(request, 'home.html', {'livros': livros,
-                                             'usuario_logado': request.session.get('usuario'),
-                                             'form': form,
-                                             'status_categoria': status_categoria,
-                                             'form_categoria': form_categoria,
-                                             'usuarios': usuarios,
-                                             'livros_emprestar': livros_emprestar,
-                                             'total_livro': total_livros,
-                                             'livros_emprestados': livros_emprestados})
+        return render(request, 'home.html', {
+            'livros': livros,
+            'usuario_logado': request.session.get('usuario'),
+            'form': form,
+            'status_categoria': status_categoria,
+            'form_categoria': form_categoria,
+            'usuarios': usuarios,
+            'total_livro': total_livros,
+        })
     else:
         return redirect('/auth/login/?status=2')
 
