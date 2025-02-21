@@ -14,6 +14,7 @@
       background-color: #ffe100;
       /* Cor de fundo personalizada */
     }
+    
 
     /* Personaliza o texto dos elementos dentro da navbar */
     .navbar-custom .navbar-brand,
@@ -25,8 +26,15 @@
 
     /* Opcional: altera a cor dos links ao passar o mouse */
     .navbar-custom .nav-link:hover {
-      color: #ffffff !important;
+      color: #000000 !important;
     }
+
+    .btn-custom {
+    background-color: #fbb800; /* cor de fundo desejada */
+    border-color: #a84305;     /* mesma cor para a borda */
+    color: #fff;               /* cor do texto */
+}
+
   </style>
 </head>
 
@@ -63,7 +71,7 @@
 
     <form class="form-inline ml-3" method="GET" action="{% url 'buscar_livro' %}">
       <input class="form-control mr-sm-2" type="search" name="q" placeholder="Buscar livro" aria-label="Buscar">
-      <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Buscar</button>
+      <button class="btn btn-custom my-2 my-sm-0" type="submit">Buscar</button>
     </form>
     {% endif %}
   </nav>
@@ -72,23 +80,34 @@
     {% if usuario_logado %}
     <!-- Conteúdo das abas -->
     <div class="tab-content" id="mainTabContent">
-      <!-- Aba de Cadastro: subdividida em Categoria e Livro -->
+      <!-- Aba de Cadastro: subdividida em Livro e Categoria -->
       <div class="tab-pane fade" id="cadastro" role="tabpanel">
         <h4 class="mb-3">Cadastro</h4>
         <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+          <!-- Primeiro: Livro -->
           <li class="nav-item">
-            <a class="nav-link active" id="pills-categoria-tab" data-toggle="pill" href="#pills-categoria" role="tab"
-              aria-controls="pills-categoria" aria-selected="true">Categoria</a>
+            <a class="nav-link active" id="pills-livro-tab" data-toggle="pill" href="#pills-livro" role="tab"
+              aria-controls="pills-livro" aria-selected="true">Livro</a>
           </li>
+          <!-- Segundo: Categoria -->
           <li class="nav-item">
-            <a class="nav-link" id="pills-livro-tab" data-toggle="pill" href="#pills-livro" role="tab"
-              aria-controls="pills-livro" aria-selected="false">Livro</a>
+            <a class="nav-link" id="pills-categoria-tab" data-toggle="pill" href="#pills-categoria" role="tab"
+              aria-controls="pills-categoria" aria-selected="false">Categoria</a>
           </li>
         </ul>
         <div class="tab-content" id="pills-tabContent">
+          <!-- Formulário para cadastrar livro -->
+          <div class="tab-pane fade show active" id="pills-livro" role="tabpanel" aria-labelledby="pills-livro-tab">
+            <form action="{% url 'cadastrar_livro' %}" method="POST">
+              {% csrf_token %}
+              <div class="form-group">
+                {{ form.as_p }}
+              </div>
+              <button type="submit" class="btn btn-success">Cadastrar Livro</button>
+            </form>
+          </div>
           <!-- Formulário para cadastrar categoria -->
-          <div class="tab-pane fade show active" id="pills-categoria" role="tabpanel"
-            aria-labelledby="pills-categoria-tab">
+          <div class="tab-pane fade" id="pills-categoria" role="tabpanel" aria-labelledby="pills-categoria-tab">
             <form action="{% url 'cadastrar_categoria' %}" method="POST">
               {% csrf_token %}
               <div class="form-group">
@@ -96,16 +115,6 @@
               </div>
               <input type="hidden" name="usuario" value="{{ usuario_logado }}">
               <button type="submit" class="btn btn-success">Cadastrar Categoria</button>
-            </form>
-          </div>
-          <!-- Formulário para cadastrar livro -->
-          <div class="tab-pane fade" id="pills-livro" role="tabpanel" aria-labelledby="pills-livro-tab">
-            <form action="{% url 'cadastrar_livro' %}" method="POST">
-              {% csrf_token %}
-              <div class="form-group">
-                {{ form.as_p }}
-              </div>
-              <button type="submit" class="btn btn-success">Cadastrar Livro</button>
             </form>
           </div>
         </div>
