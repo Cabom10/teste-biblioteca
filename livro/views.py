@@ -167,19 +167,33 @@ def alterar_livro(request):
     nome_livro = request.POST.get('nome_livro')
     autor = request.POST.get('autor')
     co_autor = request.POST.get('co_autor')
+    descricao = request.POST.get('descricao')
     categoria_id = request.POST.get('categoria_id')
 
-    categoria = Categoria.objects.get(id = categoria_id)
-    livro = Livros.objects.get(id = livro_id)
+    # Obtenha o livro e a categoria
+    categoria = Categoria.objects.get(id=categoria_id)
+    livro = Livros.objects.get(id=livro_id)
+
+    # Verifique se o usuário é o proprietário do livro
     if livro.usuario.id == request.session['usuario']:
+        # Atualize os outros campos
         livro.nome = nome_livro
         livro.autor = autor
         livro.co_autor = co_autor
+        livro.descricao = descricao
         livro.categoria = categoria
+        
+        # Restaure a data_cadastro original
+        
+        
+        # Salve o livro sem alterar a data_cadastro
         livro.save()
+
         return redirect(f'/livro/ver_livro/{livro_id}')
     else:
         return redirect('/auth/sair')
+
+
 
 def seus_emprestimos(request):
     usuario = Usuario.objects.get(id = request.session['usuario'])
