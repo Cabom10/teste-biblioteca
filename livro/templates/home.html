@@ -1,28 +1,59 @@
 {% extends 'base.html' %}
 
-
 {% block 'conteudo' %}
 
+<!-- Adicionando o CSS diretamente no template -->
+<style>
+    /* Esconde a descrição por padrão */
+    .descricao {
+        display: none;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    /* Quando o checkbox estiver marcado, a descrição será exibida */
+    .descricao-toggle:checked + .expandir-btn + .descricao {
+        display: block;
+    }
+
+    /* Estilo do botão de expansão */
+    .expandir-btn {
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .expandir-btn:hover {
+        background-color: #45a049;
+    }
+
+    /* Esconde o input checkbox (não visível para o usuário) */
+    .descricao-toggle {
+        display: none;
+    }
+</style>
+
 <div class="container">
-
-
   <br>
   {% if status_categoria == '1' %}
   <div class="alert alert-success" role="alert">
     Categoria cadastrada com sucesso
   </div>
   {% endif %}
+
   <div class="btn-group">
     <a href="{% url 'home' %}" class="btn btn-primary">Todos</a>
     <a href="{% url 'home' %}?status=disponivel" class="btn btn-success">Disponíveis</a>
     <a href="{% url 'home' %}?status=emprestado" class="btn btn-warning">Emprestados</a>
-</div>
+  </div>
 
   <div class="row">
- 
-
     {% for livro in livros %}
-  
     <div class="col-md">
       <div class="card" style="width: 18rem;">
         <div class="card-body">
@@ -47,24 +78,23 @@
           {% endif %}
         
           <br><br>
+
+          <!-- Checkbox para expandir e contrair a descrição -->
+          <input type="checkbox" id="descricao-toggle-{{ livro.id }}" class="descricao-toggle">
+          <label for="descricao-toggle-{{ livro.id }}" class="expandir-btn">Ver descrição</label>
+
+          <div class="descricao">
+            <p>{{ livro.descricao }}</p>
+          </div>
+
+          <br>
           <a href="{% url 'ver_livros' livro.id %}" class="btn btn-info">Acessar</a>
         </div>
-        
-
-
       </div>
       <br>
     </div>
-
-
-
     {% endfor %}
-
-
-
-
   </div>
 </div>
-
 
 {% endblock %}

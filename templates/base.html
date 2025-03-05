@@ -14,7 +14,7 @@
       background-color: #ffe100;
       /* Cor de fundo personalizada */
     }
-    
+
 
     /* Personaliza o texto dos elementos dentro da navbar */
     .navbar-custom .navbar-brand,
@@ -30,11 +30,13 @@
     }
 
     .btn-custom {
-    background-color: #fbb800; /* cor de fundo desejada */
-    border-color: #a84305;     /* mesma cor para a borda */
-    color: #fff;               /* cor do texto */
-}
-
+      background-color: #fbb800;
+      /* cor de fundo desejada */
+      border-color: #a84305;
+      /* mesma cor para a borda */
+      color: #fff;
+      /* cor do texto */
+    }
   </style>
 </head>
 
@@ -98,7 +100,7 @@
         <div class="tab-content" id="pills-tabContent">
           <!-- Formulário para cadastrar livro -->
           <div class="tab-pane fade show active" id="pills-livro" role="tabpanel" aria-labelledby="pills-livro-tab">
-            <form action="{% url 'cadastrar_livro' %}" method="POST">
+            <form action="{% url 'cadastrar_livro' %}" method="POST" enctype="multipart/form-data">
               {% csrf_token %}
               <div class="form-group">
                 {{ form.as_p }}
@@ -106,6 +108,7 @@
               <button type="submit" class="btn btn-success">Cadastrar Livro</button>
             </form>
           </div>
+
           <!-- Formulário para cadastrar categoria -->
           <div class="tab-pane fade" id="pills-categoria" role="tabpanel" aria-labelledby="pills-categoria-tab">
             <form action="{% url 'cadastrar_categoria' %}" method="POST">
@@ -125,28 +128,30 @@
         <h4 class="mb-3">Registro de Empréstimo</h4>
         <form action="{% url 'cadastrar_emprestimo' %}" method="POST">
           {% csrf_token %}
-          
+
           <div class="form-group">
-              <label for="nome_emprestado">Nome do Usuário:</label>
-              <input type="text" class="form-control" id="nome_emprestado" name="nome_emprestado" placeholder="Nome do usuário" required>
+            <label for="nome_emprestado">Nome do Usuário:</label>
+            <input type="text" class="form-control" id="nome_emprestado" name="nome_emprestado"
+              placeholder="Nome do usuário" required>
           </div>
-          
+
           <div class="form-group">
-              <label for="email_emprestado">E-mail:</label>
-              <input type="email" class="form-control" id="email_emprestado" name="email_emprestado" placeholder="E-mail do usuário" required>
+            <label for="email_emprestado">E-mail:</label>
+            <input type="email" class="form-control" id="email_emprestado" name="email_emprestado"
+              placeholder="E-mail do usuário" required>
           </div>
-          
+
           <div class="form-group">
-              <label for="livro_emprestado">Selecione o Livro:</label>
-              <select class="form-control" id="livro_emprestado" name="livro_emprestado" required>
-                  {% for livro in livros_emprestar %}
-                      <option value="{{ livro.id }}">{{ livro.nome }}</option>
-                  {% endfor %}
-              </select>
+            <label for="livro_emprestado">Selecione o Livro:</label>
+            <select class="form-control" id="livro_emprestado" name="livro_emprestado" required>
+              {% for livro in livros_emprestar %}
+              <option value="{{ livro.id }}">{{ livro.nome }}</option>
+              {% endfor %}
+            </select>
           </div>
-          
+
           <button type="submit" class="btn btn-success">Registrar Empréstimo</button>
-      </form>
+        </form>
       </div>
 
       <!-- Aba de Devolução -->

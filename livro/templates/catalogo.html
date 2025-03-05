@@ -1,5 +1,38 @@
 {% extends 'base.html' %}
+
 {% block 'conteudo' %}
+
+<!-- Adicionando o CSS diretamente no template -->
+<style>
+    .descricao {
+        display: none;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .descricao-toggle:checked + .expandir-btn + .descricao {
+        display: block;
+    }
+
+    .expandir-btn {
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .expandir-btn:hover {
+        background-color: #45a049;
+    }
+
+    .descricao-toggle {
+        display: none;
+    }
+</style>
 
 <div class="container">
     <h1 class="my-4">Catálogo de Livros</h1>
@@ -32,6 +65,15 @@
                         {% else %}
                             <p class="text-success"><strong>Disponível</strong></p>
                         {% endif %}
+
+                        <!-- Checkbox para expandir e mostrar a descrição do livro -->
+                        <input type="checkbox" id="descricao-toggle-{{ livro.id }}" class="descricao-toggle">
+                        <label for="descricao-toggle-{{ livro.id }}" class="expandir-btn">Ver descrição</label>
+
+                        <div class="descricao">
+                            <p>{{ livro.descricao }}</p>
+                        </div>
+
                     </div>
                 </div>
             </div>

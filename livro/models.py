@@ -21,7 +21,8 @@ class Livros(models.Model):
     emprestado = models.BooleanField(default=False)
     categoria = models.ForeignKey(Categoria, on_delete=models.DO_NOTHING)
     usuario = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING)
-    codigo = models.CharField(max_length=50, null=True, blank=True)  
+    codigo = models.CharField(max_length=50, null=True, blank=True)
+    descricao = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name = 'Livro'
