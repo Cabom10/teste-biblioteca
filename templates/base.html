@@ -123,41 +123,30 @@
       <!-- Aba de Empréstimo -->
       <div class="tab-pane fade" id="emprestimo" role="tabpanel">
         <h4 class="mb-3">Registro de Empréstimo</h4>
-        <form id="form_emprestimo" action="{% url 'cadastrar_emprestimo' %}" method="POST">
+        <form action="{% url 'cadastrar_emprestimo' %}" method="POST">
           {% csrf_token %}
+          
           <div class="form-group">
-            <label>Tipo de Usuário:</label><br>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="tipo_usuario" id="usuarioNovo" value="novo" checked>
-              <label class="form-check-label" for="usuarioNovo">Usuário Novo</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="tipo_usuario" id="usuarioExistente" value="existente">
-              <label class="form-check-label" for="usuarioExistente">Usuário Existente</label>
-            </div>
+              <label for="nome_emprestado">Nome do Usuário:</label>
+              <input type="text" class="form-control" id="nome_emprestado" name="nome_emprestado" placeholder="Nome do usuário" required>
           </div>
-          <div class="form-group" id="select-usuario" style="display: none;">
-            <label>Selecione o usuário:</label>
-            <select class="form-control" name="nome_emprestado">
-              {% for usuario in usuarios %}
-              <option value="{{ usuario.id }}">{{ usuario.nome }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="form-group" id="input-usuario">
-            <label>Digite o nome do usuário:</label>
-            <input type="text" class="form-control" name="nome_emprestado_anonimo" placeholder="Nome do usuário">
-          </div>
+          
           <div class="form-group">
-            <label>Selecione o livro:</label>
-            <select class="form-control" name="livro_emprestado">
-              {% for livro in livros_emprestar %}
-              <option value="{{ livro.id }}">{{ livro.nome }}</option>
-              {% endfor %}
-            </select>
+              <label for="email_emprestado">E-mail:</label>
+              <input type="email" class="form-control" id="email_emprestado" name="email_emprestado" placeholder="E-mail do usuário" required>
           </div>
+          
+          <div class="form-group">
+              <label for="livro_emprestado">Selecione o Livro:</label>
+              <select class="form-control" id="livro_emprestado" name="livro_emprestado" required>
+                  {% for livro in livros_emprestar %}
+                      <option value="{{ livro.id }}">{{ livro.nome }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+          
           <button type="submit" class="btn btn-success">Registrar Empréstimo</button>
-        </form>
+      </form>
       </div>
 
       <!-- Aba de Devolução -->

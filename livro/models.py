@@ -30,22 +30,14 @@ class Livros(models.Model):
         return self.nome
 
 class Emprestimos(models.Model):
-    choices = (
-        ('P', 'Péssimo'),
-        ('R', 'Ruim'),
-        ('B', 'Bom'),
-        ('O', 'Ótimo')
-    )
-    nome_emprestado = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING, blank=True, null=True)
-    nome_emprestado_anonimo = models.CharField(max_length=30, blank=True, null=True)
-    email_emprestado = models.EmailField(max_length=254, blank=True, null=True)  # <== Adicionado!
-    data_emprestimo = models.DateTimeField(default=datetime.datetime.now())
-    data_devolucao = models.DateTimeField(blank=True, null=True)
-    livro = models.ForeignKey(Livros, on_delete=models.DO_NOTHING)
-    avaliacao = models.CharField(max_length=1, choices=choices, null=True, blank=True)
-
+    livro = models.ForeignKey(Livros, on_delete=models.CASCADE)
+    nome_emprestado_anonimo = models.CharField(max_length=255)
+    email_emprestado = models.EmailField()
+    data_emprestimo = models.DateTimeField(auto_now_add=True)
+    data_devolucao = models.DateTimeField(null=True, blank=True)
+    
     def __str__(self):
-        return f"{self.nome_emprestado} | {self.livro}"
+        return f"{self.livro.nome} emprestado para {self.nome_emprestado_anonimo}"
 
 
 

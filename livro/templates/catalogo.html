@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block 'conteudo' %}
+
+<div class="container">
+    <h1 class="my-4">Catálogo de Livros</h1>
+
+    <form method="GET" action="{% url 'catalogo' %}" class="form-inline mb-4">
+        <input type="text" name="busca" class="form-control mr-2" placeholder="Buscar livro..." value="{{ busca }}">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+
+    <div class="btn-group mb-4">
+        <a href="{% url 'catalogo' %}" class="btn btn-primary">Todos</a>
+        <a href="{% url 'catalogo' %}?status=disponivel" class="btn btn-success">Disponíveis</a>
+        <a href="{% url 'catalogo' %}?status=emprestado" class="btn btn-warning">Emprestados</a>
+    </div>
+    
+    <div class="row">
+        {% for livro in livros %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ livro.nome }}</h5>
+                        <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
+                        {% if livro.co_autor %}
+                            <p class="card-text"><strong>Co-autor:</strong> {{ livro.co_autor }}</p>
+                        {% endif %}
+                        <p class="card-text"><strong>Categoria:</strong> {{ livro.categoria }}</p>
+                        
+                        {% if livro.emprestado %}
+                            <p class="text-danger"><strong>Indisponível</strong></p>
+                        {% else %}
+                            <p class="text-success"><strong>Disponível</strong></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="col-12">Nenhum livro encontrado.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
