@@ -2,7 +2,6 @@
 
 {% block 'conteudo' %}
 
-<!-- Adicionando o CSS diretamente no template -->
 <style>
     .descricao {
         display: none;
@@ -11,7 +10,7 @@
         color: #555;
     }
 
-    .descricao-toggle:checked + .expandir-btn + .descricao {
+    .descricao-toggle:checked+.expandir-btn+.descricao {
         display: block;
     }
 
@@ -37,48 +36,63 @@
 <div class="container">
     <h1 class="my-4">Catálogo de Livros</h1>
 
+    <!-- Formulário de busca e filtro -->
     <form method="GET" action="{% url 'catalogo' %}" class="form-inline mb-4">
         <input type="text" name="busca" class="form-control mr-2" placeholder="Buscar livro..." value="{{ busca }}">
+
+        <select name="categoria" class="form-control mr-2" onchange="this.form.submit()">
+            <option value="">Todas as categorias</option>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}" {% if categoria.id|stringformat:"s" == categoria_selecionada %}selected{% endif %}>
+                    {{ categoria.nome }}
+                </option>
+            {% endfor %}
+        </select>
+
         <button type="submit" class="btn btn-primary">Buscar</button>
     </form>
 
+    <!-- Botões de status -->
     <div class="btn-group mb-4">
         <a href="{% url 'catalogo' %}" class="btn btn-primary">Todos</a>
-        <a href="{% url 'catalogo' %}?status=disponivel" class="btn btn-success">Disponíveis</a>
-        <a href="{% url 'catalogo' %}?status=emprestado" class="btn btn-warning">Emprestados</a>
+        <a href="{% url 'catalogo' %}?status=disponivel{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" class="btn btn-success">Disponíveis</a>
+        <a href="{% url 'catalogo' %}?status=emprestado{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" class="btn btn-warning">Emprestados</a>
     </div>
-    
+
     <div class="row">
         {% for livro in livros %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ livro.nome }}</h5>
-                        <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
-                        {% if livro.co_autor %}
-                            <p class="card-text"><strong>Co-autor:</strong> {{ livro.co_autor }}</p>
-                        {% endif %}
-                        <p class="card-text"><strong>Categoria:</strong> {{ livro.categoria }}</p>
-                        
-                        {% if livro.emprestado %}
-                            <p class="text-danger"><strong>Indisponível</strong></p>
-                        {% else %}
-                            <p class="text-success"><strong>Disponível</strong></p>
-                        {% endif %}
+        <div class="col-md-4 mb-4">
+            <div class="card" style="width: 18rem;">
+                {% if livro.imagem %}
+                <img src="{{ livro.imagem.url }}" alt="{{ livro.nome }}" style="width:300px; height:200px; object-fit: contain;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ livro.nome }}</h5>
+                    <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
+                    {% if livro.co_autor %}
+                    <p class="card-text"><strong>Co-autor:</strong> {{ livro.co_autor }}</p>
+                    {% endif %}
+                    <p class="card-text"><strong>Categoria:</strong> {{ livro.categoria }}</p>
 
-                        <!-- Checkbox para expandir e mostrar a descrição do livro -->
-                        <input type="checkbox" id="descricao-toggle-{{ livro.id }}" class="descricao-toggle">
-                        <label for="descricao-toggle-{{ livro.id }}" class="expandir-btn">Ver descrição</label>
+                    {% if livro.emprestado %}
+                    <p class="text-danger"><strong>Indisponível</strong></p>
+                    {% else %}
+                    <p class="text-success"><strong>Disponível</strong></p>
+                    {% endif %}
 
-                        <div class="descricao">
-                            <p>{{ livro.descricao }}</p>
-                        </div>
+                    <!-- Checkbox para expandir e mostrar a descrição do livro -->
+                    <input type="checkbox" id="descricao-toggle-{{ livro.id }}" class="descricao-toggle">
+                    <label for="descricao-toggle-{{ livro.id }}" class="expandir-btn">Ver descrição</label>
 
+                    <div class="descricao">
+                        <p>{{ livro.descricao }}</p>
                     </div>
+
                 </div>
             </div>
+        </div>
         {% empty %}
-            <p class="col-12">Nenhum livro encontrado.</p>
+        <p class="col-12">Nenhum livro encontrado.</p>
         {% endfor %}
     </div>
 </div>

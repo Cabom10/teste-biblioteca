@@ -22,6 +22,7 @@ class Livros(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING)
     codigo = models.CharField(max_length=50, null=True, blank=True)
     descricao = models.TextField(blank=True, null=True)
+    imagem = models.ImageField(upload_to='livros/', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Livro'

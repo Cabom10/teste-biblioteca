@@ -1,5 +1,7 @@
+
 <!doctype html>
 <html lang="pt-BR">
+{% load static %}
 
 <head>
   <!-- Meta tags obrigatórias -->
@@ -41,42 +43,33 @@
 </head>
 
 <body>
-  <!-- Navbar principal -->
-  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-    <a class="navbar-brand" href="{% url 'home' %}">Biblioteca VNT</a>
-    {% if usuario_logado %}
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ml-auto">
-        <!-- Itens do menu -->
-        <li class="nav-item">
-          <a class="nav-link" href="#emprestimo" data-toggle="tab">Emprestar</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#devolucao" data-toggle="tab">Devolver</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#cadastro" data-toggle="tab">Cadastrar</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'seus_emprestimos' %}">Meus Empréstimos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'sair' %}">Sair</a>
-        </li>
-        <li class="nav-item">
-          <span class="navbar-text ml-2">Total: {{ total_livro }}</span>
-        </li>
-      </ul>
-    </div>
+<!-- Navbar principal -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+  <!-- Adicionando a logo corretamente -->
+  <a class="navbar-brand" href="{% url 'catalogo' %}">
+    <img src="{% static 'images/logo.png' %}" 
+         style="width: 70px; height: 70px; object-fit: contain;">
+  </a>
 
+  {% if usuario_logado %}
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item"><a class="nav-link" href="#emprestimo" data-toggle="tab">Emprestar</a></li>
+      <li class="nav-item"><a class="nav-link" href="#devolucao" data-toggle="tab">Devolver</a></li>
+      <li class="nav-item"><a class="nav-link" href="#cadastro" data-toggle="tab">Cadastrar</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'seus_emprestimos' %}">Meus Empréstimos</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'sair' %}">Sair</a></li>
+      <li class="nav-item"><span class="navbar-text ml-2">Total: {{ total_livro }}</span></li>
+    </ul>
+  </div>
 
-
-    <form class="form-inline ml-3" method="GET" action="{% url 'buscar_livro' %}">
-      <input class="form-control mr-sm-2" type="search" name="q" placeholder="Buscar livro" aria-label="Buscar">
-      <button class="btn btn-custom my-2 my-sm-0" type="submit">Buscar</button>
-    </form>
-    {% endif %}
-  </nav>
+  <!-- Formulário de busca -->
+  <form class="form-inline ml-3" method="GET" action="{% url 'buscar_livro' %}">
+    <input class="form-control mr-sm-2" type="search" name="q" placeholder="Buscar livro" aria-label="Buscar">
+    <button class="btn btn-custom my-2 my-sm-0" type="submit">Buscar</button>
+  </form>
+  {% endif %}
+</nav>
 
   <div class="container mt-4">
     {% if usuario_logado %}

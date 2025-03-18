@@ -131,14 +131,18 @@ def devolver_livro(request):
 
 def cadastrar_livro(request):
     if request.method == 'POST':
-        form = CadastroLivro(request.POST)
+        # Aqui precisa incluir request.FILES
+        form = CadastroLivro(request.POST, request.FILES)
         
         if form.is_valid():
             form.save()
             return redirect('/livro/home')
         else:
             return HttpResponse('DADOS INVÁLIDOS')
-        
+    else:
+        form = CadastroLivro()
+    
+    return render(request, 'cadastro_livro.html', {'form': form})
 def excluir_livro(request, id):
     livro = Livros.objects.get(id = id).delete()
     return redirect('/livro/home')
@@ -235,15 +239,29 @@ def buscar_livro(request):
 def catalogo(request):
     busca = request.GET.get('busca', '').strip()
     status = request.GET.get('status', '')
+    categoria_id = request.GET.get('categoria', None)
 
-    livros = Livros.objects.all()
+    livros = Livros.objects.all()  # Corrigindo a referência ao modelo Livro
 
+    # Filtro por busca (nome do livro)
     if busca:
         livros = livros.filter(nome__icontains=busca)
 
+    # Filtro por status (disponível ou emprestado)
     if status == "disponivel":
         livros = livros.filter(emprestado=False)
     elif status == "emprestado":
         livros = livros.filter(emprestado=True)
 
-    return render(request, 'catalogo.html', {'livros': livros, 'busca': busca})
+    # Filtro por categoria
+    if categoria_id:
+        livros = livros.filter(categoria__id=categoria_id)
+
+    categorias = Categoria.objects.all()  # Listar todas as categorias para o filtro
+
+    return render(request, 'catalogo.html', {
+        'livros': livros,
+        'categorias': categorias,
+        'busca': busca,
+        'categoria_selecionada': categoria_id
+    })
