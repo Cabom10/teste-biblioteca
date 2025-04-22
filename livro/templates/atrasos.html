@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block 'conteudo' %}
+  <!-- Conteúdo da página de atrasos -->
+  <h2>Livros com Atraso</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Usuário</th>
+        <th>Livro</th>
+        <th>Data de Empréstimo</th>
+        <th>Data Esperada de Devolução</th>
+        <th>Dias em Atraso</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for atraso in atrasos %}
+        <tr>
+          <td>{{ atraso.usuario }}</td>
+          <td>{{ atraso.livro }}</td>
+          <td>{{ atraso.data_emprestimo }}</td>
+          <td>{{ atraso.data_prevista }}</td>
+          <td>{{ atraso.dias_atraso }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">Nenhum atraso encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

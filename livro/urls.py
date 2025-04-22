@@ -18,6 +18,7 @@ urlpatterns = [
     path('buscar_livro/', views.buscar_livro, name='buscar_livro'),
     path('ver_livro/<int:id>/', views.ver_livros, name='ver_livro'),
     path('catalogo/', views.catalogo, name='catalogo'), 
+    path('atrasos/', views.atrasos, name='atrasos'),
   
 
 

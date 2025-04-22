@@ -1,4 +1,4 @@
-from datetime import date, datetime
+
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from usuarios.models import Usuario
@@ -7,6 +7,9 @@ from .forms import CadastroLivro, CategoriaLivro
 from django import forms
 from django.db.models import Q
 from django.contrib import messages
+
+from django.utils import timezone
+from datetime import timedelta
 # Create your views here.
 
 def home(request):
@@ -93,10 +96,13 @@ def cadastrar_emprestimo(request):
         
         # Criar o registro de empréstimo com os dados recebidos
         emprestimo = Emprestimos(nome_emprestado_anonimo=nome_emprestado,
-                                 email_emprestado=email_emprestado,
-                                 livro_id=livro_emprestado)
+                         email_emprestado=email_emprestado,
+                         livro_id=livro_emprestado,
+                         data_emprestimo=timezone.now(),  # Data do empréstimo
+                         data_prevista=timezone.now() + timedelta(days=30))  # Data prevista de devolução (30 dias após)
         emprestimo.save()
 
+        
         # Atualizar o status do livro para emprestado
         livro = Livros.objects.get(id=livro_emprestado)
         livro.emprestado = True
@@ -122,7 +128,9 @@ def devolver_livro(request):
     if pendentes.exists():
         # Atualize o primeiro empréstimo pendente (ou use .latest('data_emprestimo') se preferir o mais recente)
         emprestimo_devolver = pendentes.first()
-        emprestimo_devolver.data_devolucao = datetime.now()
+        # depois
+        emprestimo_devolver.data_devolucao = timezone.now()
+
         emprestimo_devolver.save()
     else:
         messages.warning(request, "Nenhum empréstimo pendente encontrado para esse livro.")
@@ -265,3 +273,33 @@ def catalogo(request):
         'busca': busca,
         'categoria_selecionada': categoria_id
     })
+
+
+def atrasos(request):
+    usuario_id = request.session.get('usuario')
+    if not usuario_id:
+        return redirect('/auth/login/?status=2')
+
+    hoje = timezone.now().date()
+
+    emprestimos_atrasados = Emprestimos.objects.filter(
+        data_prevista__lt=hoje,
+        data_devolucao__isnull=True
+)
+
+    atrasos = []
+    for emprestimo in emprestimos_atrasados:
+        dias = (hoje - emprestimo.data_prevista).days
+    atrasos.append({
+        'usuario': emprestimo.nome_emprestado_anonimo or emprestimo.email_emprestado,
+        'livro': emprestimo.livro,
+        'data_emprestimo': emprestimo.data_emprestimo,
+        'data_prevista': emprestimo.data_prevista,
+        'dias_atraso': dias
+})
+
+    context = {
+        'usuario_logado': usuario_id,
+        'atrasos': atrasos,
+}
+    return render(request, 'atrasos.html', context)

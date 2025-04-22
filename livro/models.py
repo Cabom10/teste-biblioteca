@@ -1,8 +1,15 @@
-from django.db import models    
+from django.db import models
 from datetime import date
 import datetime
 from django.db.models.base import Model
 from usuarios.models import Usuario
+from datetime import timedelta
+from django.utils import timezone
+
+
+def get_default_data_prevista():
+    return timezone.now().date() + timedelta(days=7)
+
 
 class Categoria(models.Model):
     nome = models.CharField(max_length=30)
@@ -30,15 +37,19 @@ class Livros(models.Model):
     def __str__(self):
         return self.nome
 
+
+def get_default_data_emprestimo():
+    return timezone.now()
+
+
 class Emprestimos(models.Model):
-    livro = models.ForeignKey(Livros, on_delete=models.CASCADE)
-    nome_emprestado_anonimo = models.CharField(max_length=255)
+    nome_emprestado_anonimo = models.CharField(max_length=100, null=True, blank=True)
     email_emprestado = models.EmailField()
-    data_emprestimo = models.DateTimeField(auto_now_add=True)
-    data_devolucao = models.DateTimeField(null=True, blank=True)
+    livro = models.ForeignKey(Livros, on_delete=models.CASCADE)
+    data_emprestimo = models.DateTimeField(default=get_default_data_emprestimo)
+    data_prevista = models.DateField(default=get_default_data_prevista)
+    data_devolucao = models.DateField(null=True, blank=True)
     
+
     def __str__(self):
-        return f"{self.livro.nome} emprestado para {self.nome_emprestado_anonimo}"
-
-
-
+        return f"{self.nome_emprestado_anonimo or self.email_emprestado} - {self.livro}"
