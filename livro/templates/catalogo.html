@@ -39,7 +39,9 @@
     <!-- Formulário de busca e filtro -->
     <form method="GET" action="{% url 'catalogo' %}" class="form-inline mb-4">
         <input type="text" name="busca" class="form-control mr-2" placeholder="Buscar livro..." value="{{ busca }}">
-
+        
+        <input type="text" name="autor" class="form-control mr-2" placeholder="Buscar por autor..." value="{{ autor }}">
+    
         <select name="categoria" class="form-control mr-2" onchange="this.form.submit()">
             <option value="">Todas as categorias</option>
             {% for categoria in categorias %}
@@ -48,7 +50,7 @@
                 </option>
             {% endfor %}
         </select>
-
+    
         <button type="submit" class="btn btn-primary">Buscar</button>
     </form>
 

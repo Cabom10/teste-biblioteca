@@ -12,31 +12,47 @@
   <title>{% block 'titulo' %}{% endblock %}</title>
   <style>
     .navbar-custom {
-      background-color: #ffe100;
-      /* Cor de fundo personalizada */
+      background-color: #FFEB3B;
     }
 
-
-    /* Personaliza o texto dos elementos dentro da navbar */
+    /* Estilo dos textos da navbar */
     .navbar-custom .navbar-brand,
     .navbar-custom .nav-link,
     .navbar-custom .navbar-text {
       color: #000000 !important;
-      /* Cor dos textos personalizada (ex: preto) */
     }
 
-    /* Opcional: altera a cor dos links ao passar o mouse */
     .navbar-custom .nav-link:hover {
-      color: #000000 !important;
+      color: #332cf3 !important;
     }
 
     .btn-custom {
-      background-color: #fbb800;
-      /* cor de fundo desejada */
+      background-color: #FFA726;
       border-color: #a84305;
-      /* mesma cor para a borda */
       color: #fff;
-      /* cor do texto */
+    }
+
+    /* === LOGO COM EFEITO === */
+    .logo-effect {
+      max-height: 100px;
+      height: auto;
+      width: 300px;
+      transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo-container {
+      background-color: #FFEB3B;
+      padding: 12px;
+      border-radius: 16px;
+      display: inline-block;
+    }
+
+    .logo-effect:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1) saturate(1.2);
+      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
     }
   </style>
 </head>
@@ -46,9 +62,10 @@
   <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
     <!-- Adicionando a logo corretamente -->
     <a class="navbar-brand" href="{% url 'catalogo' %}">
-      <img src="{% static 'images/logo.png' %}" style="width: 70px; height: 70px; object-fit: contain;">
+      <div class="logo-container">
+        <img src="{% static 'images/logo.png' %}" class="logo-effect">
+      </div>
     </a>
-
     {% if usuario_logado %}
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ml-auto">
@@ -134,14 +151,75 @@
               placeholder="E-mail do usuário" required>
           </div>
 
-          <div class="form-group">
-            <label for="livro_emprestado">Selecione o Livro:</label>
-            <select class="form-control" id="livro_emprestado" name="livro_emprestado" required>
-              {% for livro in livros_emprestar %}
-              <option value="{{ livro.id }}">{{ livro.nome }}</option>
-              {% endfor %}
-            </select>
+          <div class="form-group position-relative">
+            <label for="livro_input">Selecione o Livro:</label>
+            <!-- input visível para o usuário digitar e buscar -->
+            <input type="text" id="livro_input" class="form-control" placeholder="Digite parte do nome..."
+              autocomplete="off" required>
+            <!-- input escondido que vai conter o ID do livro -->
+            <input type="hidden" name="livro_emprestado" id="livro_id_input" required>
+            <!-- lista de sugestões -->
+            <ul class="list-group position-absolute w-100" id="livro_suggestions"
+              style="z-index:1000; max-height:200px; overflow-y:auto; display:none;"></ul>
           </div>
+
+          <script>
+            document.addEventListener('DOMContentLoaded', function () {
+              const livrosList = [
+                {% for livro in livros_emprestar %}
+                { id: {{ livro.id }}, nome: "{{ livro.nome|escapejs }}" },
+              {% endfor %}
+          
+            ];
+
+            const input = document.getElementById('livro_input');
+            const hidden = document.getElementById('livro_id_input');
+            const suggestions = document.getElementById('livro_suggestions');
+
+            // Função para renderizar as sugestões
+            function renderSuggestions(itens) {
+              suggestions.innerHTML = '';
+              if (!itens.length) {
+                suggestions.style.display = 'none';
+                return;
+              }
+              itens.forEach(l => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item list-group-item-action';
+                li.textContent = l.nome;
+                li.dataset.id = l.id;
+                suggestions.appendChild(li);
+              });
+              suggestions.style.display = 'block';
+            }
+
+            // Filtra à medida que o usuário digita
+            input.addEventListener('input', function () {
+              const filtro = this.value.toLowerCase();
+              const filtrados = livrosList.filter(l =>
+                l.nome.toLowerCase().includes(filtro)
+              );
+              renderSuggestions(filtrados);
+            });
+
+            // Quando o usuário clica numa sugestão
+            suggestions.addEventListener('click', function (e) {
+              if (e.target.tagName === 'LI') {
+                input.value = e.target.textContent;    // nome visível
+                hidden.value = e.target.dataset.id;     // id real
+                suggestions.style.display = 'none';
+              }
+            });
+
+            // Fecha a lista se clicar fora
+            document.addEventListener('click', function (e) {
+              if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+                suggestions.style.display = 'none';
+              }
+            });
+          });
+          </script>
+
 
           <button type="submit" class="btn btn-success">Registrar Empréstimo</button>
         </form>
@@ -152,40 +230,101 @@
         <h4 class="mb-3">Registro de Devolução</h4>
         <form action="{% url 'devolver_livro' %}" method="POST">
           {% csrf_token %}
-          <div class="form-group">
-            <label>Selecione o livro a ser devolvido:</label>
-            <select class="form-control" name="id_livro_devolver">
-              {% for livro in livros_emprestados %}
-              <option value="{{ livro.id }}">{{ livro.nome }}</option>
-              {% endfor %}
-            </select>
+          <div class="form-group position-relative">
+            <label for="devolucao_input">Selecione o livro a ser devolvido:</label>
+            <!-- campo visível para buscar pelo nome -->
+            <input type="text" id="devolucao_input" class="form-control" placeholder="Digite parte do nome..."
+              autocomplete="off" required>
+            <!-- escondido: conterá o ID real do livro -->
+            <input type="hidden" name="id_livro_devolver" id="devolucao_id_input" required>
+            <!-- lista de sugestões -->
+            <ul class="list-group position-absolute w-100" id="devolucao_suggestions"
+              style="z-index:1000; max-height:200px; overflow-y:auto; display:none;"></ul>
           </div>
           <button type="submit" class="btn btn-warning">Registrar Devolução</button>
         </form>
       </div>
-    </div>
-    {% endif %}
 
-    {% block 'conteudo' %}{% endblock %}
-  </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const livrosDev = [
+            {% for livro in livros_emprestados %}
+        { id: {{ livro.id }}, nome: "{{ livro.nome|escapejs }}" },
+          {% endfor %}
+    ];
 
-  <!-- Scripts necessários -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Alterna entre os campos para usuário novo ou existente no formulário de empréstimo
-    $(document).ready(function () {
-      $('input[name="tipo_usuario"]').change(function () {
-        if ($('#usuarioExistente').is(':checked')) {
-          $('#select-usuario').show();
-          $('#input-usuario').hide();
-        } else {
-          $('#select-usuario').hide();
-          $('#input-usuario').show();
+        const inpDev = document.getElementById('devolucao_input');
+        const hidDev = document.getElementById('devolucao_id_input');
+        const listDev = document.getElementById('devolucao_suggestions');
+
+        function renderDev(arr) {
+          listDev.innerHTML = '';
+          if (!arr.length) {
+            listDev.style.display = 'none';
+            return;
+          }
+          arr.forEach(l => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item list-group-item-action';
+            li.textContent = l.nome;
+            li.dataset.id = l.id;
+            listDev.appendChild(li);
+          });
+          listDev.style.display = 'block';
         }
+
+        // Ao focar, exibe todas as opções
+        inpDev.addEventListener('focus', () => {
+          renderDev(livrosDev);
+        });
+
+        // Filtra conforme digita
+        inpDev.addEventListener('input', function () {
+          const q = this.value.toLowerCase();
+          const filtrados = livrosDev.filter(l => l.nome.toLowerCase().includes(q));
+          renderDev(filtrados);
+        });
+
+        // Seleção
+        listDev.addEventListener('click', function (e) {
+          if (e.target.tagName === 'LI') {
+            inpDev.value = e.target.textContent;
+            hidDev.value = e.target.dataset.id;
+            listDev.style.display = 'none';
+          }
+        });
+
+        // Fecha ao clicar fora
+        document.addEventListener('click', function (e) {
+          if (!inpDev.contains(e.target) && !listDev.contains(e.target)) {
+            listDev.style.display = 'none';
+          }
+        });
+  });
+      </script>
+
+      {% endif %}
+
+      {% block 'conteudo' %}{% endblock %}
+    </div>
+
+    <!-- Scripts necessários -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Alterna entre os campos para usuário novo ou existente no formulário de empréstimo
+      $(document).ready(function () {
+        $('input[name="tipo_usuario"]').change(function () {
+          if ($('#usuarioExistente').is(':checked')) {
+            $('#select-usuario').show();
+            $('#input-usuario').hide();
+          } else {
+            $('#select-usuario').hide();
+            $('#input-usuario').show();
+          }
+        });
       });
-    });
-  </script>
+    </script>
 </body>
 
 </html>

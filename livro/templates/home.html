@@ -38,19 +38,41 @@
     }
 </style>
 
-<div class="container">
-  <br>
-  {% if status_categoria == '1' %}
-  <div class="alert alert-success" role="alert">
-    Categoria cadastrada com sucesso
-  </div>
-  {% endif %}
 
-  <div class="btn-group">
-    <a href="{% url 'home' %}" class="btn btn-primary">Todos</a>
-    <a href="{% url 'home' %}?status=disponivel" class="btn btn-success">Disponíveis</a>
-    <a href="{% url 'home' %}?status=emprestado" class="btn btn-warning">Emprestados</a>
-  </div>
+<form method="GET" action="{% url 'home' %}" class="form-inline mb-4">
+  <input type="text" name="busca"
+         class="form-control mr-2"
+         placeholder="Buscar livro..."
+         value="{{ busca }}">
+
+  <input type="text" name="autor"
+         class="form-control mr-2"
+         placeholder="Buscar por autor..."
+         value="{{ autor }}">
+
+  <select name="categoria"
+          class="form-control mr-2"
+          onchange="this.form.submit()">
+    <option value="">Todas as categorias</option>
+    {% for cat in categorias %}
+      <option value="{{ cat.id }}"
+        {% if cat.id|stringformat:"s" == categoria_selecionada %}selected{% endif %}>
+        {{ cat.nome }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <button type="submit" class="btn btn-primary">Buscar</button>
+</form>
+
+<div class="btn-group mb-4">
+  <a href="{% url 'home' %}" class="btn btn-primary">Todos</a>
+  <a href="{% url 'home' %}?status=disponivel{% if busca %}&busca={{ busca }}{% endif %}{% if autor %}&autor={{ autor }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}"
+     class="btn btn-success">Disponíveis</a>
+  <a href="{% url 'home' %}?status=emprestado{% if busca %}&busca={{ busca }}{% endif %}{% if autor %}&autor={{ autor }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}"
+     class="btn btn-warning">Emprestados</a>
+</div>
+
 
 
     <div class="row">

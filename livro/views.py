@@ -1,4 +1,3 @@
-
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from usuarios.models import Usuario
@@ -10,66 +9,74 @@ from django.contrib import messages
 
 from django.utils import timezone
 from datetime import timedelta
-# Create your views here.
 
 def home(request):
-    if request.session.get('usuario'):  
-        usuario = Usuario.objects.get(id=request.session['usuario'])
-        
-        # Captura o parâmetro de filtro
-        filtro_status = request.GET.get('status', '')
-        
-        # Busca os livros do usuário
-        livros = Livros.objects.filter(usuario=usuario)
-        
-        # Aplica o filtro, se fornecido
-        if filtro_status == 'disponivel':
-            livros = livros.filter(emprestado=False)
-        elif filtro_status == 'emprestado':
-            livros = livros.filter(emprestado=True)
-        
-        total_livros = livros.count()
-        form = CadastroLivro()
-        form.fields['usuario'].initial = request.session['usuario']
-        form.fields['categoria'].queryset = Categoria.objects.filter(usuario=usuario)     
-        form_categoria = CategoriaLivro()
-        usuarios = Usuario.objects.all()
-        
-        # Se necessário, você pode manter as query separadas para empréstimos
-        livros_emprestar = Livros.objects.filter(usuario=usuario, emprestado=False)
-        livros_emprestados = Livros.objects.filter(usuario=usuario, emprestado=True)
-
-        return render(request, 'home.html', {
-            'livros': livros,
-            'usuario_logado': request.session.get('usuario'),
-            'form': form,
-            'form_categoria': form_categoria,
-            'usuarios': usuarios,
-            'livros_emprestar': livros_emprestar,
-            'total_livro': total_livros,
-            'livros_emprestados': livros_emprestados
-        })
-    else:
+    if not request.session.get('usuario'):
         return redirect('/auth/login/?status=2')
+
+    usuario = Usuario.objects.get(id=request.session['usuario'])
+
+    busca = request.GET.get('busca', '').strip()
+    autor = request.GET.get('autor', '').strip()
+    categoria = request.GET.get('categoria', '')
+    status = request.GET.get('status', '')
+
+    livros = Livros.objects.filter(usuario=usuario).order_by('nome')
+
+    if busca:
+        livros = livros.filter(nome__icontains=busca)
+    if autor:
+        livros = livros.filter(autor__icontains=autor)
+    if categoria:
+        livros = livros.filter(categoria_id=categoria)
+    if status == 'disponivel':
+        livros = livros.filter(emprestado=False)
+    elif status == 'emprestado':
+        livros = livros.filter(emprestado=True)
+
+    categorias = Categoria.objects.filter(usuario=usuario).order_by('nome')
+
+    total_livros = livros.count()
+    form = CadastroLivro()
+    form.fields['usuario'].initial = usuario.id
+    form.fields['categoria'].queryset = categorias
+    form_categoria = CategoriaLivro()
+    usuarios = Usuario.objects.all()
+    livros_emprestar = livros.filter(emprestado=False)
+    livros_emprestados = livros.filter(emprestado=True)
+
+    return render(request, 'home.html', {
+        'livros': livros,
+        'busca': busca,
+        'autor': autor,
+        'categorias': categorias,
+        'categoria_selecionada': categoria,
+        'status': status,
+        'usuario_logado': usuario.id,
+        'form': form,
+        'form_categoria': form_categoria,
+        'usuarios': usuarios,
+        'total_livro': total_livros,
+        'livros_emprestar': livros_emprestar,
+        'livros_emprestados': livros_emprestados,
+    })
 
 def ver_livros(request, id):
     if request.session.get('usuario'):
         livro = Livros.objects.get(id=id)
         if request.session.get('usuario') == livro.usuario.id:
             usuario = Usuario.objects.get(id=request.session['usuario'])
-            categoria_livro = Categoria.objects.filter(usuario=request.session.get('usuario'))
-            
-            # Ordena os empréstimos para exibir os mais recentes primeiro
+            categoria_livro = Categoria.objects.filter(usuario=usuario).order_by('nome')
+
             emprestimos = Emprestimos.objects.filter(livro=livro).order_by('-data_emprestimo')
-            
+
             form = CadastroLivro()
             form.fields['usuario'].initial = request.session['usuario']
-            form.fields['categoria'].queryset = Categoria.objects.filter(usuario=usuario)
+            form.fields['categoria'].queryset = categoria_livro
             form_categoria = CategoriaLivro()
             usuarios = Usuario.objects.all()
-
-            livros_emprestar = Livros.objects.filter(usuario=usuario, emprestado=False)
-            livros_emprestados = Livros.objects.filter(usuario=usuario, emprestado=True)
+            livros_emprestar = Livros.objects.filter(usuario=usuario, emprestado=False).order_by('nome')
+            livros_emprestados = Livros.objects.filter(usuario=usuario, emprestado=True).order_by('nome')
 
             return render(request, 'ver_livro.html', {
                 'livro': livro,
@@ -87,29 +94,26 @@ def ver_livros(request, id):
             return HttpResponse('Esse livro não é seu')
     return redirect('/auth/login/?status=2')
 
-
 def cadastrar_emprestimo(request):
     if request.method == 'POST':
         nome_emprestado = request.POST.get('nome_emprestado')
         email_emprestado = request.POST.get('email_emprestado')
         livro_emprestado = request.POST.get('livro_emprestado')
-        
-        # Criar o registro de empréstimo com os dados recebidos
-        emprestimo = Emprestimos(nome_emprestado_anonimo=nome_emprestado,
-                         email_emprestado=email_emprestado,
-                         livro_id=livro_emprestado,
-                         data_emprestimo=timezone.now(),  # Data do empréstimo
-                         data_prevista=timezone.now() + timedelta(days=30))  # Data prevista de devolução (30 dias após)
+
+        emprestimo = Emprestimos(
+            nome_emprestado_anonimo=nome_emprestado,
+            email_emprestado=email_emprestado,
+            livro_id=livro_emprestado,
+            data_emprestimo=timezone.now(),
+            data_prevista=timezone.now() + timedelta(days=30)
+        )
         emprestimo.save()
 
-        
-        # Atualizar o status do livro para emprestado
         livro = Livros.objects.get(id=livro_emprestado)
         livro.emprestado = True
         livro.save()
-        
-        return redirect('/livro/home')
 
+        return redirect('/livro/home')
 
 def devolver_livro(request):
     id = request.POST.get('id_livro_devolver')
@@ -118,30 +122,23 @@ def devolver_livro(request):
     except Livros.DoesNotExist:
         messages.error(request, "Livro não encontrado.")
         return redirect('/livro/home')
-    
-    # Marque o livro como não emprestado
+
     livro_devolver.emprestado = False
     livro_devolver.save()
-    
-    # Busque empréstimos pendentes (sem data_devolucao)
+
     pendentes = Emprestimos.objects.filter(livro=livro_devolver, data_devolucao__isnull=True)
     if pendentes.exists():
-        # Atualize o primeiro empréstimo pendente (ou use .latest('data_emprestimo') se preferir o mais recente)
         emprestimo_devolver = pendentes.first()
-        # depois
         emprestimo_devolver.data_devolucao = timezone.now()
-
         emprestimo_devolver.save()
     else:
         messages.warning(request, "Nenhum empréstimo pendente encontrado para esse livro.")
-    
+
     return redirect('/livro/home')
 
 def cadastrar_livro(request):
     if request.method == 'POST':
-        # Aqui precisa incluir request.FILES
         form = CadastroLivro(request.POST, request.FILES)
-        
         if form.is_valid():
             form.save()
             return redirect('/livro/home')
@@ -149,10 +146,10 @@ def cadastrar_livro(request):
             return HttpResponse('DADOS INVÁLIDOS')
     else:
         form = CadastroLivro()
-    
     return render(request, 'cadastro_livro.html', {'form': form})
+
 def excluir_livro(request, id):
-    livro = Livros.objects.get(id = id).delete()
+    livro = Livros.objects.get(id=id).delete()
     return redirect('/livro/home')
 
 def cadastrar_categoria(request):
@@ -171,8 +168,6 @@ def cadastrar_categoria(request):
                 return HttpResponse('Usuário inválido.')
         else:
             return HttpResponse(f'Formulário inválido: {form.errors}')
-    
-
 
 def alterar_livro(request):
     livro_id = request.POST.get('livro_id')
@@ -182,48 +177,36 @@ def alterar_livro(request):
     descricao = request.POST.get('descricao')
     categoria_id = request.POST.get('categoria_id')
 
-    # Obtenha o livro e a categoria
     categoria = Categoria.objects.get(id=categoria_id)
     livro = Livros.objects.get(id=livro_id)
 
-    # Verifique se o usuário é o proprietário do livro
     if livro.usuario.id == request.session['usuario']:
-        # Atualize os outros campos
         livro.nome = nome_livro
         livro.autor = autor
         livro.co_autor = co_autor
         livro.descricao = descricao
         livro.categoria = categoria
-        
-        # Restaure a data_cadastro original
-        
-        
-        # Salve o livro sem alterar a data_cadastro
         livro.save()
 
         return redirect(f'/livro/ver_livro/{livro_id}')
     else:
         return redirect('/auth/sair')
 
-
-
 def seus_emprestimos(request):
-    usuario = Usuario.objects.get(id = request.session['usuario'])
-    emprestimos = Emprestimos.objects.filter(nome_emprestado = usuario)
-    
+    usuario = Usuario.objects.get(id=request.session['usuario'])
+    emprestimos = Emprestimos.objects.filter(nome_emprestado=usuario)
 
-
-    return render(request, 'seus_emprestimos.html', {'usuario_logado': request.session['usuario'],
-                                                    'emprestimos': emprestimos})
+    return render(request, 'seus_emprestimos.html', {
+        'usuario_logado': request.session['usuario'],
+        'emprestimos': emprestimos
+    })
 
 def processa_avaliacao(request):
     id_emprestimo = request.POST.get('id_emprestimo')
     opcoes = request.POST.get('opcoes')
     id_livro = request.POST.get('id_livro')
-    #TODO: Verificar segurança
-    #TODO: Não permitir avaliação de livro nao devolvido
-    #TODO: Colocar as estrelas
-    emprestimo = Emprestimos.objects.get(id = id_emprestimo)
+
+    emprestimo = Emprestimos.objects.get(id=id_emprestimo)
     emprestimo.avaliacao = opcoes
     emprestimo.save()
     return redirect(f'/livro/ver_livro/{id_livro}')
@@ -232,7 +215,6 @@ def buscar_livro(request):
     query = request.GET.get('q', '').strip()
     if query:
         try:
-            # Busca exata ignorando maiúsculas/minúsculas
             livro = Livros.objects.get(nome__iexact=query)
             return redirect('ver_livro', id=livro.id)
         except Livros.DoesNotExist:
@@ -241,65 +223,54 @@ def buscar_livro(request):
             messages.warning(request, "Mais de um livro foi encontrado. Por favor, refine sua busca.")
     return redirect('home')
 
-
-
-
 def catalogo(request):
-    busca = request.GET.get('busca', '').strip()
-    status = request.GET.get('status', '')
-    categoria_id = request.GET.get('categoria', None)
+    busca = request.GET.get('busca', '')
+    autor = request.GET.get('autor', '')
+    categoria_id = request.GET.get('categoria')
+    status = request.GET.get('status')
 
-    livros = Livros.objects.all()  # Corrigindo a referência ao modelo Livro
+    livros = Livros.objects.all().order_by('nome')
 
-    # Filtro por busca (nome do livro)
     if busca:
         livros = livros.filter(nome__icontains=busca)
-
-    # Filtro por status (disponível ou emprestado)
-    if status == "disponivel":
+    if autor:
+        livros = livros.filter(autor__icontains=autor)
+    if categoria_id:
+        livros = livros.filter(categoria_id=categoria_id)
+    if status == 'disponivel':
         livros = livros.filter(emprestado=False)
-    elif status == "emprestado":
+    elif status == 'emprestado':
         livros = livros.filter(emprestado=True)
 
-    # Filtro por categoria
-    if categoria_id:
-        livros = livros.filter(categoria__id=categoria_id)
+    categorias = Categoria.objects.all().order_by('nome')
 
-    categorias = Categoria.objects.all()  # Listar todas as categorias para o filtro
-
-    return render(request, 'catalogo.html', {
+    context = {
         'livros': livros,
-        'categorias': categorias,
         'busca': busca,
-        'categoria_selecionada': categoria_id
-    })
+        'autor': autor,
+        'categorias': categorias,
+        'categoria_selecionada': categoria_id,
+    }
 
+    return render(request, 'catalogo.html', context)
 
 def atrasos(request):
-    usuario_id = request.session.get('usuario')
-    if not usuario_id:
+    if not request.session.get('usuario'):
         return redirect('/auth/login/?status=2')
 
     hoje = timezone.now().date()
+    atrasos = [
+        {
+            'usuario': emp.nome_emprestado_anonimo or emp.email_emprestado,
+            'livro': emp.livro,
+            'data_emprestimo': emp.data_emprestimo,
+            'data_prevista': emp.data_prevista,
+            'dias_atraso': (hoje - emp.data_prevista).days
+        }
+        for emp in Emprestimos.objects.filter(data_prevista__lt=hoje, data_devolucao__isnull=True)
+    ]
 
-    emprestimos_atrasados = Emprestimos.objects.filter(
-        data_prevista__lt=hoje,
-        data_devolucao__isnull=True
-)
-
-    atrasos = []
-    for emprestimo in emprestimos_atrasados:
-        dias = (hoje - emprestimo.data_prevista).days
-    atrasos.append({
-        'usuario': emprestimo.nome_emprestado_anonimo or emprestimo.email_emprestado,
-        'livro': emprestimo.livro,
-        'data_emprestimo': emprestimo.data_emprestimo,
-        'data_prevista': emprestimo.data_prevista,
-        'dias_atraso': dias
-})
-
-    context = {
-        'usuario_logado': usuario_id,
+    return render(request, 'atrasos.html', {
+        'usuario_logado': request.session['usuario'],
         'atrasos': atrasos,
-}
-    return render(request, 'atrasos.html', context)
+    })

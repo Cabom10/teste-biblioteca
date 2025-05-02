@@ -30,6 +30,10 @@
       <label>Nome do livro:</label>
       <input class="form-control" type="text" value="{{livro.nome}}" name="nome_livro">
     </p>
+    <p>
+      <label>código:</label>
+      <input class="form-control" type="text" value="{{livro.codigo}}" name="código">
+    </p>
 
     <p>
       <label>Autor:</label>
@@ -104,6 +108,7 @@
         <th>Nome da Pessoa</th>
         <th>Email</th>
         <th>Data de Empréstimo</th>
+        <th>Data esperada</th>
         <th>Data de Devolução</th>
       </tr>
     </thead>
@@ -113,7 +118,8 @@
           <td>{{ emprestimo.livro.nome }}</td>
           <td>{{ emprestimo.nome_emprestado_anonimo }}</td>
           <td>{{ emprestimo.email_emprestado }}</td>
-          <td>{{ emprestimo.data_emprestimo }}</td>
+          <td>{{ emprestimo.data_emprestimo|date:"d/m/Y \\à\\s H:i" }}</td>
+          <td>{{ emprestimo.data_prevista|date:"d/m/Y" }}</td>
           <td>{{ emprestimo.data_devolucao }}</td>
         </tr>
       {% empty %}
