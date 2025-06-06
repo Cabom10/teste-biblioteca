@@ -6,87 +6,89 @@
   <!-- Meta tags obrigatórias -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
-  {% block 'head' %}{% endblock %}
-  <title>{% block 'titulo' %}{% endblock %}</title>
-  <style>
-    .navbar-custom {
-      background-color: #FFEB3B;
-    }
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
 
-    /* Estilo dos textos da navbar */
-    .navbar-custom .navbar-brand,
-    .navbar-custom .nav-link,
-    .navbar-custom .navbar-text {
-      color: #000000 !important;
-    }
+  <!-- CSS personalizado -->
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 
-    .navbar-custom .nav-link:hover {
-      color: #332cf3 !important;
-    }
-
-    .btn-custom {
-      background-color: #FFA726;
-      border-color: #a84305;
-      color: #fff;
-    }
-
-    /* === LOGO COM EFEITO === */
-    .logo-effect {
-      max-height: 100px;
-      height: auto;
-      width: 300px;
-      transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
-      border-radius: 15px;
-      box-shadow: 0 6px 20px 6px rgba(0, 0, 0, 0.3);
-    }
-
-    .logo-container {
-      background-color: #FFEB3B;
-      padding: 12px;
-      border-radius: 16px;
-      display: inline-block;
-    }
-
-    .logo-effect:hover {
-      transform: scale(1.05);
-      filter: brightness(1.1) saturate(1.2);
-      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
-    }
-  </style>
+  {% block head %}{% endblock %}
+  <title>{% block titulo %}Minha Biblioteca{% endblock %}</title>
 </head>
 
 <body>
   <!-- Navbar principal -->
   <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-    <!-- Adicionando a logo corretamente -->
+    <!-- Logo -->
     <a class="navbar-brand" href="{% url 'catalogo' %}">
       <div class="logo-container">
-        <img src="{% static 'images/logo.png' %}" class="logo-effect">
+        <img src="{% static 'images/logo.png' %}"
+             class="logo-effect img-fluid"
+             alt="Logo">
       </div>
     </a>
-    {% if usuario_logado %}
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item"><a class="nav-link" href="#emprestimo" data-toggle="tab">Emprestar</a></li>
-        <li class="nav-item"><a class="nav-link" href="#devolucao" data-toggle="tab">Devolver</a></li>
-        <li class="nav-item"><a class="nav-link" href="#cadastro" data-toggle="tab">Cadastrar</a></li>
-        <!-- Nova aba Atrasos -->
-        <li class="nav-item"><a class="nav-link" href="{% url 'atrasos' %}">Atrasos</a></li>
-        <li class="nav-item">
-        <li class="nav-item"><a class="nav-link" href="{% url 'sair' %}">Sair</a></li>
-        <li class="nav-item"><span class="navbar-text ml-2">Total: {{ total_livro }}</span></li>
-      </ul>
-    </div>
 
-    <!-- Formulário de busca -->
-    <form class="form-inline ml-3" method="GET" action="{% url 'buscar_livro' %}">
-      <input class="form-control mr-sm-2" type="search" name="q" placeholder="Buscar livro" aria-label="Buscar">
-      <button class="btn btn-custom my-2 my-sm-0" type="submit">Buscar</button>
-    </form>
-    {% endif %}
+    <!-- Botão toggler para mobile -->
+    <button class="navbar-toggler" type="button"
+            data-toggle="collapse" data-target="#navbarMenu"
+            aria-controls="navbarMenu" aria-expanded="false"
+            aria-label="Mostrar menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Menu colapsável -->
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      {% if usuario_logado %}
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#emprestimo" data-toggle="tab">Emprestar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#devolucao" data-toggle="tab">Devolver</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#cadastro" data-toggle="tab">Cadastrar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'atrasos' %}">Atrasos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'sair' %}">Sair</a>
+        </li>
+        <li class="nav-item">
+          <span class="navbar-text ml-2">Total: {{ total_livro }}</span>
+        </li>
+      </ul>
+
+      <!-- Formulário de busca -->
+      <form class="form-inline ml-3"
+            method="GET"
+            action="{% url 'buscar_livro' %}">
+        <input class="form-control mr-sm-2"
+               type="search"
+               name="q"
+               placeholder="Buscar livro"
+               aria-label="Buscar">
+        <button class="btn btn-custom my-2 my-sm-0"
+                type="submit">Buscar</button>
+      </form>
+      {% endif %}
+    </div>
   </nav>
+
+  <div class="container mt-4">
+    {% block conteudo %}{% endblock %}
+  </div>
+
+  <!-- Scripts JS (jQuery e Bootstrap) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
+
 
   <div class="container mt-4">
     {% if usuario_logado %}

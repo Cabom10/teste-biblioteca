@@ -172,6 +172,7 @@ def cadastrar_categoria(request):
 def alterar_livro(request):
     livro_id = request.POST.get('livro_id')
     nome_livro = request.POST.get('nome_livro')
+    codigo       = request.POST.get('codigo')  
     autor = request.POST.get('autor')
     co_autor = request.POST.get('co_autor')
     descricao = request.POST.get('descricao')
@@ -182,6 +183,7 @@ def alterar_livro(request):
 
     if livro.usuario.id == request.session['usuario']:
         livro.nome = nome_livro
+        livro.codigo    = codigo 
         livro.autor = autor
         livro.co_autor = co_autor
         livro.descricao = descricao

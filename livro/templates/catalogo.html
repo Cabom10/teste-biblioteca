@@ -1,102 +1,142 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block 'conteudo' %}
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
 
-<style>
-    .descricao {
-        display: none;
-        margin-top: 10px;
-        font-size: 14px;
-        color: #555;
-    }
+<div class="catalogo-fundo">
+    <div class="container py-5">
+        <h1 class="text-center text-white mb-5 titulo-principal">📚 Catálogo de Livros</h1>
 
-    .descricao-toggle:checked+.expandir-btn+.descricao {
-        display: block;
-    }
-
-    .expandir-btn {
-        margin-top: 10px;
-        padding: 5px 10px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        cursor: pointer;
-        display: inline-block;
-    }
-
-    .expandir-btn:hover {
-        background-color: #45a049;
-    }
-
-    .descricao-toggle {
-        display: none;
-    }
-</style>
-
-<div class="container">
-    <h1 class="my-4">Catálogo de Livros</h1>
-
-    <!-- Formulário de busca e filtro -->
-    <form method="GET" action="{% url 'catalogo' %}" class="form-inline mb-4">
-        <input type="text" name="busca" class="form-control mr-2" placeholder="Buscar livro..." value="{{ busca }}">
-        
-        <input type="text" name="autor" class="form-control mr-2" placeholder="Buscar por autor..." value="{{ autor }}">
-    
-        <select name="categoria" class="form-control mr-2" onchange="this.form.submit()">
-            <option value="">Todas as categorias</option>
-            {% for categoria in categorias %}
-                <option value="{{ categoria.id }}" {% if categoria.id|stringformat:"s" == categoria_selecionada %}selected{% endif %}>
-                    {{ categoria.nome }}
-                </option>
-            {% endfor %}
-        </select>
-    
-        <button type="submit" class="btn btn-primary">Buscar</button>
-    </form>
-
-    <!-- Botões de status -->
-    <div class="btn-group mb-4">
-        <a href="{% url 'catalogo' %}" class="btn btn-primary">Todos</a>
-        <a href="{% url 'catalogo' %}?status=disponivel{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" class="btn btn-success">Disponíveis</a>
-        <a href="{% url 'catalogo' %}?status=emprestado{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" class="btn btn-warning">Emprestados</a>
-    </div>
-
-    <div class="row">
-        {% for livro in livros %}
-        <div class="col-md-4 mb-4">
-            <div class="card" style="width: 18rem;">
-                {% if livro.imagem %}
-                <img src="{{ livro.imagem.url }}" alt="{{ livro.nome }}" style="width:300px; height:200px; object-fit: contain;">
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ livro.nome }}</h5>
-                    <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
-                    {% if livro.co_autor %}
-                    <p class="card-text"><strong>Co-autor:</strong> {{ livro.co_autor }}</p>
-                    {% endif %}
-                    <p class="card-text"><strong>Categoria:</strong> {{ livro.categoria }}</p>
-
-                    {% if livro.emprestado %}
-                    <p class="text-danger"><strong>Indisponível</strong></p>
-                    {% else %}
-                    <p class="text-success"><strong>Disponível</strong></p>
-                    {% endif %}
-
-                    <!-- Checkbox para expandir e mostrar a descrição do livro -->
-                    <input type="checkbox" id="descricao-toggle-{{ livro.id }}" class="descricao-toggle">
-                    <label for="descricao-toggle-{{ livro.id }}" class="expandir-btn">Ver descrição</label>
-
-                    <div class="descricao">
-                        <p>{{ livro.descricao }}</p>
+        <!-- Formulário de Busca -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <form method="GET" action="{% url 'catalogo' %}" class="form-busca">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" 
+                                   name="busca" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="🔍 Buscar livro..." 
+                                   value="{{ busca|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" 
+                                   name="autor" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="✍️ Buscar por autor..." 
+                                   value="{{ autor|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="categoria" 
+                                    class="form-select form-select-lg" 
+                                    onchange="this.form.submit()">
+                                <option value="">📂 Todas as categorias</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" 
+                                        {% if categoria.id|stringformat:"s" == categoria_selecionada %}selected{% endif %}>
+                                    {{ categoria.nome }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-busca btn-lg w-100">
+                                🔍 Buscar
+                            </button>
+                        </div>
                     </div>
+                </form>
+            </div>
+        </div>
 
+        <!-- Filtros de Status -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-auto">
+                <div class="btn-group btn-group-filtros" role="group" aria-label="Filtros de status">
+                    <a href="{% url 'catalogo' %}" 
+                       class="btn btn-filtro {% if not request.GET.status %}active{% endif %}">
+                        📋 Todos
+                    </a>
+                    <a href="{% url 'catalogo' %}?status=disponivel{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" 
+                       class="btn btn-filtro disponivel {% if request.GET.status == 'disponivel' %}active{% endif %}">
+                        ✅ Disponíveis
+                    </a>
+                    <a href="{% url 'catalogo' %}?status=emprestado{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" 
+                       class="btn btn-filtro emprestado {% if request.GET.status == 'emprestado' %}active{% endif %}">
+                        ⏰ Emprestados
+                    </a>
                 </div>
             </div>
         </div>
-        {% empty %}
-        <p class="col-12">Nenhum livro encontrado.</p>
-        {% endfor %}
+
+        <!-- Grid de Livros -->
+        <div class="row justify-content-center g-4">
+            {% for livro in livros %}
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3 d-flex justify-content-center">
+                <div class="livro-card">
+                    <div class="card-img-container">
+                        {% if livro.imagem %}
+                        <img src="{{ livro.imagem.url }}" 
+                             class="card-img-top" 
+                             alt="{{ livro.nome }}"
+                             loading="lazy">
+                        {% else %}
+                        <div class="img-placeholder">
+                            <i class="fas fa-book fa-3x"></i>
+                            <p>Sem imagem</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="status-badge {% if not livro.emprestado %}disponivel{% else %}emprestado{% endif %}">
+                            {% if not livro.emprestado %}
+                                ✅ Disponível
+                            {% else %}
+                                ⏰ Emprestado
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ livro.nome }}</h5>
+                        <p class="card-text autor">
+                            <strong>👤 Autor:</strong> {{ livro.autor }}
+                        </p>
+                        {% if livro.co_autor %}
+                        <p class="card-text co-autor">
+                            <strong>👥 Co-autor:</strong> {{ livro.co_autor }}
+                        </p>
+                        {% endif %}
+                        <p class="card-text categoria">
+                            <strong>🏷️ Categoria:</strong> {{ livro.categoria }}
+                        </p>
+                        
+                        <div class="mt-auto">
+                            <input type="checkbox" id="descricao-toggle-{{ livro.id }}" class="descricao-toggle">
+                            <label for="descricao-toggle-{{ livro.id }}" class="expandir-btn">
+                                📖 Ver Descrição
+                            </label>
+                            
+                            <div class="descricao">
+                                <p>{{ livro.descricao }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center text-white py-5 estado-vazio">
+                    <div class="icone-vazio">📚</div>
+                    <h3>Nenhum livro encontrado</h3>
+                    <p class="mb-4">Tente ajustar os filtros de busca ou navegue por todas as categorias.</p>
+                    <a href="{% url 'catalogo' %}" class="btn btn-outline-light btn-lg">
+                        🔄 Limpar Filtros
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
-
 {% endblock %}

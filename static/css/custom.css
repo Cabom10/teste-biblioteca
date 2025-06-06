@@ -1,0 +1,65 @@
+/* static/css/custom.css */
+
+/* Navbar personalizada */
+.navbar-custom {
+  background-color: #FFEB3B;
+}
+
+/* Estilo dos textos da navbar */
+.navbar-custom .navbar-brand,
+.navbar-custom .nav-link,
+.navbar-custom .navbar-text {
+  color: #000 !important;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #332cf3 !important;
+}
+
+/* Botão customizado */
+.btn-custom {
+  background-color: #FFA726;
+  border-color: #a84305;
+  color: #fff;
+}
+
+/* ==== LOGO COM EFEITO ==== */
+.logo-effect {
+  max-height: 100px;
+  height: auto;
+  width: 300px;
+  transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px 6px rgba(0, 0, 0, 0.3);
+}
+
+.logo-container {
+  background-color: #FFEB3B;
+  padding: 12px;
+  border-radius: 16px;
+  display: inline-block;
+}
+
+.logo-effect:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1) saturate(1.2);
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Ajustes para telas pequenas */
+@media (max-width: 576px) {
+  .logo-effect {
+    max-height: 60px;
+    width: auto;
+    padding: 6px;
+  }
+  .btn-custom {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+  .navbar-custom .navbar-brand,
+  .navbar-custom .nav-link,
+  .navbar-custom .navbar-text {
+    font-size: 0.9rem;
+  }
+}

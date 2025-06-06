@@ -1,0 +1,471 @@
+
+/* Remove margens e paddings padrões */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden; /* Evita barra de rolagem horizontal */
+}
+
+/* Garante que o fundo ocupa toda a largura e altura */
+.catalogo-fundo {
+    background: url('/static/images/fundo-livros.jpg') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    width: 100%;
+    padding: 2rem 0;
+    /* Adiciona padding-top para compensar a navbar fixa */
+    padding-top: 10px;
+}
+
+/* Remove paddings laterais do container, se quiser full width */
+.container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+}
+
+/* Overlay do fundo */
+.catalogo-fundo::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.catalogo-fundo > .container {
+    position: relative;
+    z-index: 1;
+    /* Remove padding-top excessivo */
+    padding-top: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Título Principal */
+.titulo-principal {
+    font-size: 3rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    margin-bottom: 3rem !important;
+}
+
+/* Formulário de Busca */
+.form-busca {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2rem;
+}
+
+.form-busca .form-control,
+.form-busca .form-select {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #e9ecef;
+    border-radius: 9px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.form-busca .form-control:focus,
+.form-busca .form-select:focus {
+    background: white;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+    transform: translateY(-2px);
+}
+
+/* Botão de Busca */
+.btn-busca {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 9px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 1rem;
+}
+
+.btn-busca:hover {
+    background: linear-gradient(45deg, #45a049, #4CAF50);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+    color: white;
+}
+
+/* Filtros de Status */
+.btn-group-filtros {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 3rem;
+}
+
+.btn-filtro {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    margin: 0 0.25rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.btn-filtro:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-filtro.active {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border-color: white;
+    font-weight: 700;
+}
+
+.btn-filtro.disponivel.active {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-filtro.emprestado.active {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #333;
+}
+
+/* Grid de Livros - Adiciona espaçamento adequado */
+.row.g-4 {
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.row.g-4 > [class*="col-"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Cards dos Livros */
+.livro-card {
+    width: 100%;
+    max-width: 280px;
+    min-height: 450px;
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    margin: 0 auto;
+}
+
+.livro-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.card-img-container {
+    position: relative;
+    overflow: hidden;
+    height: 300px;
+}
+
+.livro-card img {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.livro-card:hover img {
+    transform: scale(1.1);
+}
+
+.img-placeholder {
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+}
+
+/* Badge de Status */
+.status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.status-badge.disponivel {
+    background: rgba(40, 167, 69, 0.9);
+}
+
+.status-badge.emprestado {
+    background: rgba(255, 193, 7, 0.9);
+    color: #333;
+}
+
+/* Corpo do Card */
+.card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+}
+
+.card-text {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+    color: #555;
+}
+
+.card-text strong {
+    color: #333;
+}
+
+/* Botão Expandir */
+.expandir-btn {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
+    text-align: center;
+    width: 100%;
+}
+
+.expandir-btn:hover {
+    background: linear-gradient(45deg, #20c997, #28a745);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Toggle para descrição */
+.descricao-toggle {
+    display: none;
+}
+
+.descricao {
+    display: none;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 1rem;
+    border-radius: 8px;
+    color: #495057;
+    border-left: 4px solid #28a745;
+    line-height: 1.5;
+}
+
+.descricao-toggle:checked + .expandir-btn + .descricao {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estado Vazio */
+.estado-vazio {
+    animation: fadeIn 0.8s ease-in;
+    padding: 3rem 1rem;
+}
+
+.icone-vazio {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .catalogo-fundo {
+        padding-top: 100px;
+    }
+    
+    .titulo-principal {
+        font-size: 2.5rem;
+    }
+    
+    .form-busca {
+        padding: 1.5rem;
+        margin: 0 1rem 2rem 1rem;
+    }
+    
+    .btn-filtro {
+        margin-bottom: 0.5rem;
+        display: block;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .btn-group-filtros {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin: 0 1rem 2rem 1rem;
+    }
+    
+    .livro-card {
+        max-width: 300px;
+        margin: 0 auto 1.5rem auto;
+    }
+    
+    .row.g-4 {
+        gap: 1rem;
+    }
+    
+    .row.g-4 > [class*="col-"] {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .catalogo-fundo {
+        padding-top: 90px;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .titulo-principal {
+        font-size: 2rem;
+        margin-bottom: 2rem !important;
+    }
+    
+    .catalogo-fundo > .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .form-busca {
+        padding: 1rem;
+        margin: 0 0 1.5rem 0;
+    }
+    
+    .card-img-container {
+        height: 250px;
+    }
+    
+    .livro-card img {
+        height: 250px;
+    }
+    
+    .livro-card {
+        max-width: 100%;
+        min-height: 400px;
+    }
+    
+    .btn-group-filtros {
+        margin: 0 0 1.5rem 0;
+    }
+}
+
+/* Efeito de loading suave */
+.livro-card img {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.livro-card img[src] {
+    opacity: 1;
+}
+
+/* Ajustes para garantir que a navbar não sobreponha o conteúdo */
+body {
+    padding-top: 0;
+}
+
+/* Se você tiver uma navbar fixa, ajuste o valor conforme necessário */
+.navbar-fixed-top + .catalogo-fundo,
+.fixed-top + .catalogo-fundo {
+    padding-top: 140px;
+}
+
+/* Melhora o espaçamento geral da grid */
+.container .row {
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+}
+
+.container .row > [class*="col-"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
