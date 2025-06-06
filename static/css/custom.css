@@ -63,3 +63,7 @@
     font-size: 0.9rem;
   }
 }
+
+.container.mt-4 {
+  background-color: transparent !important;
+}
