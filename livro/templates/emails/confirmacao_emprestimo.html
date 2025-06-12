@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Olá {{ nome }},</h2>
+    <p>Seu empréstimo do livro <strong>{{ titulo }}</strong> foi confirmado com sucesso.</p>
+    <p>
+      Data prevista de devolução: 
+      <strong>{{ data_prevista|date:"j \\d\\e F \\d\\e Y" }}</strong>.
+    </p>
+    <p>
+      Aproveite a leitura e não se esqueça de devolver o livro na data prevista para que outros leitores também possam desfrutar dele!
+    </p>
+    <p>—Biblioteca VNT</p>
+    <hr>
+    <p style="text-align:center;">
+      <img src="cid:logo_cid" alt="Logo Biblioteca VNT" width="150">
+    </p>
+  </body>
+</html>

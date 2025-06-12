@@ -9,6 +9,14 @@ from django.contrib import messages
 
 from django.utils import timezone
 from datetime import timedelta
+from django.contrib.staticfiles import finders  
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from email.mime.image import MIMEImage
+import os
+from django.conf import settings 
+
 
 def home(request):
     if not request.session.get('usuario'):
@@ -96,24 +104,57 @@ def ver_livros(request, id):
 
 def cadastrar_emprestimo(request):
     if request.method == 'POST':
-        nome_emprestado = request.POST.get('nome_emprestado')
-        email_emprestado = request.POST.get('email_emprestado')
-        livro_emprestado = request.POST.get('livro_emprestado')
+        nome = request.POST.get('nome_emprestado')
+        email = request.POST.get('email_emprestado')
+        livro_id = request.POST.get('livro_emprestado')
 
+        # 1) Salvar empréstimo
         emprestimo = Emprestimos(
-            nome_emprestado_anonimo=nome_emprestado,
-            email_emprestado=email_emprestado,
-            livro_id=livro_emprestado,
+            nome_emprestado_anonimo=nome,
+            email_emprestado=email,
+            livro_id=livro_id,
             data_emprestimo=timezone.now(),
             data_prevista=timezone.now() + timedelta(days=30)
         )
         emprestimo.save()
 
-        livro = Livros.objects.get(id=livro_emprestado)
+        # 2) Marcar livro como emprestado
+        livro = Livros.objects.get(id=livro_id)
         livro.emprestado = True
         livro.save()
 
+        # 3) Preparar e-mail com logo inline
+        assunto = f"Confirmação de Empréstimo: {livro.nome}"
+        contexto = {
+            'nome': nome,
+            'titulo': livro.nome,
+            'data_prevista': emprestimo.data_prevista,
+        }
+        html_content = render_to_string('emails/confirmacao_emprestimo.html', contexto)
+
+        msg = EmailMultiAlternatives(
+            assunto,
+            '',                    # texto simples vazio
+            None,                  # DEFAULT_FROM_EMAIL
+            [email],
+        )
+        msg.attach_alternative(html_content, "text/html")
+
+        # 4) Localizar e anexar a logo INLINE
+        logo_path = finders.find('images/logo.png')
+        if logo_path:
+            with open(logo_path, 'rb') as f:
+                logo = MIMEImage(f.read())
+                logo.add_header('Content-ID', '<logo_cid>')
+                logo.add_header('Content-Disposition', 'inline', filename='logo.png')
+                msg.attach(logo)
+
+        # 5) Enviar
+        msg.send(fail_silently=False)
+
         return redirect('/livro/home')
+
+    return redirect('/livro/home')
 
 def devolver_livro(request):
     id = request.POST.get('id_livro_devolver')
@@ -276,3 +317,4 @@ def atrasos(request):
         'usuario_logado': request.session['usuario'],
         'atrasos': atrasos,
     })
+

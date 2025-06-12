@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'livro',
-    'usuarios'
+    'usuarios',
+     
 ]
 
 MIDDLEWARE = [
@@ -139,3 +140,21 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# settings.py
+
+# 1) Use o backend SMTP do Django
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# 2) Configurações do servidor SMTP
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# 3) Credenciais da conta que vai enviar (sua App Password de 16 caracteres)
+EMAIL_HOST_USER = 'vntbiblioteca@gmail.com'
+EMAIL_HOST_PASSWORD = 'kkku gzsc ters vvjk' 
+
+# 4) E-mail “from” padrão
+DEFAULT_FROM_EMAIL = 'Biblioteca <vntbiblioteca@gmail.com>'
