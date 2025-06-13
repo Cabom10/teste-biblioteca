@@ -142,7 +142,6 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# settings.py
 
 # 1) Use o backend SMTP do Django
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -158,3 +157,5 @@ EMAIL_HOST_PASSWORD = 'kkku gzsc ters vvjk'
 
 # 4) E-mail “from” padrão
 DEFAULT_FROM_EMAIL = 'Biblioteca <vntbiblioteca@gmail.com>'
+
+

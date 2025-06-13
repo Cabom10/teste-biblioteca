@@ -5,13 +5,13 @@
     <h2>Olá {{ nome }},</h2>
 
     <p>
-      O prazo para devolução do livro 
-      <strong>{{ titulo }}</strong> venceu em 
-      <strong>{{ data_limite|date:"j \\d\\e F \\d\\e Y" }}</strong>.
+      O prazo para devolução do livro
+      <strong>{{ titulo }}</strong> venceu em
+      <strong>{{ data_prevista|date:"j \\d\\e F \\d\\e Y" }}</strong>.
     </p>
 
     <p>
-      Por favor, devolva-o o quanto antes para que outros leitores também possam aproveitá-lo.
+      Por favor, devolva-o o quanto antes para que outros leitores também possam aproveitá‑lo.
     </p>
 
     <p>— Equipe da Biblioteca VNT</p>
@@ -19,7 +19,10 @@
     <hr style="border:none; border-top:1px solid #ddd; margin:20px 0;">
 
     <p style="text-align:center;">
-      <img src="cid:logo_cid" alt="Logo Biblioteca VNT" width="150" style="display:block; margin:0 auto;">
+      <img src="cid:logo_cid"
+           alt="Logo Biblioteca VNT"
+           width="150"
+           style="display:block; margin:0 auto;">
     </p>
   </body>
 </html>

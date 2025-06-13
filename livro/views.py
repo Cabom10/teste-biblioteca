@@ -297,24 +297,29 @@ def catalogo(request):
 
     return render(request, 'catalogo.html', context)
 
+
 def atrasos(request):
     if not request.session.get('usuario'):
         return redirect('/auth/login/?status=2')
 
     hoje = timezone.now().date()
-    atrasos = [
-        {
+    # só quem atrasou e não devolveu
+    qs = Emprestimos.objects.filter(
+        data_prevista__lt=hoje,
+        data_devolucao__isnull=True,
+    )
+
+    atrasos_list = []
+    for emp in qs:
+        dias_atraso = (hoje - emp.data_prevista).days
+        atrasos_list.append({
             'usuario': emp.nome_emprestado_anonimo or emp.email_emprestado,
             'livro': emp.livro,
-            'data_emprestimo': emp.data_emprestimo,
             'data_prevista': emp.data_prevista,
-            'dias_atraso': (hoje - emp.data_prevista).days
-        }
-        for emp in Emprestimos.objects.filter(data_prevista__lt=hoje, data_devolucao__isnull=True)
-    ]
+            'dias_atraso': dias_atraso,
+        })
 
     return render(request, 'atrasos.html', {
         'usuario_logado': request.session['usuario'],
-        'atrasos': atrasos,
+        'atrasos': atrasos_list,
     })
-
